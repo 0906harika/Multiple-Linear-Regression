@@ -1,0 +1,31 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import warnings
+import os
+warnings.filterwarnings('ignore')
+df =pd.read_csv('50_Startups.csv')
+x=df.iloc[:,:-1].values
+y=df.iloc[:,4].values
+from sklearn.preprocessing import OneHotEncoder,LabelEncoder
+from sklearn.compose import ColumnTransformer
+
+# Initialize LabelEncoder
+labelencoder = LabelEncoder()
+
+# Encode the categorical column (index 3) using LabelEncoder
+x[:, 3] = labelencoder.fit_transform(x[:, 3])
+
+# Initialize ColumnTransformer to apply OneHotEncoder to the desired column
+ct = ColumnTransformer([('encoder', OneHotEncoder(), [3])], remainder='passthrough')
+
+# Fit and transform the data using ColumnTransformer
+x = ct.fit_transform(x)
+x=x[:,1:]
+from sklearn.model_selection import train_test_split
+x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.2,random_state=0)
+from sklearn.linear_model import LinearRegression
+regressor = LinearRegression()
+regressor.fit(x_train, y_train)
+y_pred=regressor.predict(x_test)
